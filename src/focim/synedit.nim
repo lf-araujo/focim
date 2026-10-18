@@ -341,7 +341,7 @@ proc setRenderFlag*(s: var SynEdit; flag: RenderFlag; enabled = true) =
 # Gap buffer access
 # ---------------------------------------------------------------------------
 
-proc getCell(s: SynEdit; i: Natural): Cell {.inline.} =
+proc getCell*(s: SynEdit; i: Natural): Cell {.inline.} =
   if i < s.front.len:
     s.front[i]
   else:
@@ -614,6 +614,8 @@ proc nimNextToken(g: var GeneralTokenizer) =
           if g.buf[pos] == '\"': inc(pos)
       else:
         g.kind = nimGetKeyword(id)
+        if g.kind == TokenClass.Identifier and g.buf[pos] == '(':
+          g.kind = TokenClass.Command              # a call: name followed by (
     of '0':
       inc(pos)
       case g.buf[pos]
@@ -726,6 +728,8 @@ proc clikeNextToken(g: var GeneralTokenizer; keywords: openArray[string]) =
       g.kind = TokenClass.Identifier
       for kw in keywords:
         if kw == id: g.kind = TokenClass.Keyword; break
+      if g.kind == TokenClass.Identifier and g.buf[pos] == '(':
+        g.kind = TokenClass.Command                # a call: name followed by (
     of '0':
       inc(pos)
       case g.buf[pos]
@@ -796,6 +800,8 @@ proc pythonNextToken(g: var GeneralTokenizer) =
       g.kind = TokenClass.Identifier
       for kw in pythonKeywords:
         if kw == id: g.kind = TokenClass.Keyword; break
+      if g.kind == TokenClass.Identifier and g.buf[pos] == '(':
+        g.kind = TokenClass.Command                # a call: name followed by (
     of '0':
       inc(pos)
       case g.buf[pos]
@@ -871,6 +877,8 @@ proc rustNextToken(g: var GeneralTokenizer) =
       g.kind = TokenClass.Identifier
       for kw in rustKeywords:
         if kw == id: g.kind = TokenClass.Keyword; break
+      if g.kind == TokenClass.Identifier and g.buf[pos] == '(':
+        g.kind = TokenClass.Command                # a call: name followed by (
     of '0':
       inc(pos)
       case g.buf[pos]
@@ -3699,6 +3707,11 @@ proc draw*(s: var SynEdit; e: Event; area: Rect; focused: bool): EditAction =
           if text.len > 0:
             putClipboardText(text)
             s.removeSelectedText()
+          else:
+            # Nothing selected: cut the whole current line (with its trailing
+            # newline), the CUA/Sublime reflex -- so C-x always cuts something.
+            putClipboardText(s.getLineText(s.currentLine.int) & "\n")
+            s.deleteLine()
       of KeyV:
         if ctrl:
           let text = getClipboardText()
