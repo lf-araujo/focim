@@ -614,8 +614,6 @@ proc nimNextToken(g: var GeneralTokenizer) =
           if g.buf[pos] == '\"': inc(pos)
       else:
         g.kind = nimGetKeyword(id)
-        if g.kind == TokenClass.Identifier and g.buf[pos] == '(':
-          g.kind = TokenClass.Command              # a call: name followed by (
     of '0':
       inc(pos)
       case g.buf[pos]
@@ -728,8 +726,6 @@ proc clikeNextToken(g: var GeneralTokenizer; keywords: openArray[string]) =
       g.kind = TokenClass.Identifier
       for kw in keywords:
         if kw == id: g.kind = TokenClass.Keyword; break
-      if g.kind == TokenClass.Identifier and g.buf[pos] == '(':
-        g.kind = TokenClass.Command                # a call: name followed by (
     of '0':
       inc(pos)
       case g.buf[pos]
@@ -800,8 +796,6 @@ proc pythonNextToken(g: var GeneralTokenizer) =
       g.kind = TokenClass.Identifier
       for kw in pythonKeywords:
         if kw == id: g.kind = TokenClass.Keyword; break
-      if g.kind == TokenClass.Identifier and g.buf[pos] == '(':
-        g.kind = TokenClass.Command                # a call: name followed by (
     of '0':
       inc(pos)
       case g.buf[pos]
@@ -877,8 +871,6 @@ proc rustNextToken(g: var GeneralTokenizer) =
       g.kind = TokenClass.Identifier
       for kw in rustKeywords:
         if kw == id: g.kind = TokenClass.Keyword; break
-      if g.kind == TokenClass.Identifier and g.buf[pos] == '(':
-        g.kind = TokenClass.Command                # a call: name followed by (
     of '0':
       inc(pos)
       case g.buf[pos]
